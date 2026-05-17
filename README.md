@@ -1,16 +1,15 @@
-# ♚ Ajedrez 6502 + SID 6581
+# ♚ MicroChess v1.0.0
 
-Juego de ajedrez contra la CPU para el procesador **6502** corriendo sobre el monitor para FPGA **Tang Nano 9K**, con display ANSI por UART y efectos de sonido generados por el chip **SID 6581**.
+Juego de ajedrez **MicroChess** para el procesador **6502** corriendo sobre el monitor para FPGA **Tang Nano 9K**, con display ANSI por UART y efectos de sonido generados por el chip **SID 6581**.
 
 ![Ajedrez 6502](images/screen.png)
 
 ## ✨ Características
 
-- 🧠 **Motor de ajedrez con Minimax + Alpha-Beta**: 3 niveles de dificultad (2, 3 y 4 ply)
+- 🧠 **Motor de ajedrez Minimax + Alpha-Beta**: 3 niveles de dificultad
 - 🎵 **Audio SID 6581**: Efectos para mover, capturar, jaque, jaque mate, enroque y promocion
-- ♔ **Modo Unicode**: Piezas con glifos reales (♔♕♖♗♘♙♚♛♜♝♞♟) en terminales UTF-8
-- 🔤 **Modo ASCII**: Compatible con cualquier terminal (KQRBNP + colores ANSI)
-- 🎮 **Control con cursor**: Movimiento con WASD/Flechas + Enter para seleccionar
+- ♔ **Piezas Unicode**: Glifos reales (♔♕♖♗♘♙♚♛♜♝♞♟) en terminales UTF-8
+- 🎮 **Control con cursor**: WASD/Flechas + Enter para seleccionar
 - 🔄 **Tablero volteable**: Tecla F para cambiar perspectiva
 - ⚡ **Optimizado para 6502**: Codigo eficiente en C89 estricto compatible con CC65
 
@@ -20,31 +19,30 @@ Juego de ajedrez contra la CPU para el procesador **6502** corriendo sobre el mo
 - **CPU**: MOS 6502 @ 3.375MHz
 - **Audio**: SID 6581 ($D400)
 - **Plataforma**: Tang Nano 9K FPGA
-- **Display**: Terminal ANSI compatible via UART
+- **Display**: Terminal ANSI compatible via UART (115200 baud)
 
 ### Software
 - **Compilador**: CC65 (`cl65`)
-- **Lenguaje**: C89 estricto + ensamblador inline
-- **Dependencias**: `romapi.h` (proporcionada por el monitor ROM)
+- **Lenguaje**: C89 estricto + ensamblador (startup, audio)
+- **Dependencias**: `romapi.h` (API de la ROM del monitor)
 
 ### Motor de Ajedrez
 - Algoritmo: Minimax con poda Alpha-Beta
-- Evaluacion: Material (P=100, N=320, B=330, R=500, Q=900, K=20000) + Piece-Square Tables
-- Ordenacion de movimientos: MVV-LVA (capturas primero)
-- Profundidad: 2 ply (Facil), 3 ply (Medio), 4 ply (Dificil)
-- Reglas completas: enroque, en passant, promocion, triple repeticion (via historial), 50 movimientos
+- Evaluacion: Material (P=100, N=320, B=330, R=500, Q=900, K=20000)
+- Ordenacion de movimientos: MVV-LVA
+- Profundidad: 1 (Facil), 2 (Medio), 3 (Dificil)
+- Reglas completas: enroque, en passant, promocion, 50 movimientos
 
 ## 🎮 Controles
 
 | Tecla | Accion |
 |---|---|
-| `WASD` / `↑←↓→` | Mover cursor por el tablero |
-| `Enter` / `Space` | Seleccionar pieza / Confirmar destino |
+| `WASD` / `Flechas` | Mover cursor |
+| `Enter` / `Espacio` | Seleccionar / Mover |
 | `Esc` | Cancelar seleccion |
-| `F` | Voltear tablero (vista negras/blancas) |
-| `M` | Cambiar Unicode / ASCII |
-| `N` | Nuevo juego (reiniciar menus) |
-| `Q` | Salir al monitor |
+| `F` | Voltear tablero |
+| `N` | Nuevo juego |
+| `Q` | Salir |
 
 ## 🎵 Efectos de Sonido SID
 
@@ -61,28 +59,29 @@ Juego de ajedrez contra la CPU para el procesador **6502** corriendo sobre el mo
 
 ## 📋 Menus del Juego
 
-Al iniciar se muestran tres menus consecutivos:
-
-1. **Modo de display**: [1] Unicode / [2] ASCII
-2. **Dificultad**: [1] Facil / [2] Medio / [3] Dificil
-3. **Color del jugador**: [1] Blanco / [2] Negro
+1. **Dificultad**: [1] Facil / [2] Medio / [3] Dificil
+2. **Color**: [1] Blancas / [2] Negras
 
 ## 🚀 Instalacion y Compilacion
 
 ### Requisitos
 - [CC65](https://cc65.github.io/) compilador cruzado para 6502
-- Make
-- Conexion serial al dispositivo Tang Nano 9K
+- Conexion serial a la Tang Nano 9K
 
 ### Compilar
 ```bash
 make
 ```
 
-### Ejecutar en la Tang Nano 9K
+### Cargar en la Tang Nano 9K
 ```
 LOAD chess.bin 0800
 R 0800
+```
+
+### Limpiar
+```bash
+make clean
 ```
 
 ## 📁 Estructura del Proyecto
@@ -90,13 +89,13 @@ R 0800
 ```
 ajedres/
 ├── src/
-│   ├── main.c          # Punto de entrada + menus + loop principal
+│   ├── main.c          # Punto de entrada, menus, bucle principal
 │   ├── startup.s       # Codigo de inicio (stack, BSS)
 │   ├── chess.c         # Tablero, reglas, generacion de movimientos
-│   ├── engine.c        # Motor CPU: minimax + alpha-beta + PST
-│   ├── render.c        # Renderizado ANSI (Unicode/ASCII)
-│   ├── input.c         # Captura de teclas (UART, secuencias escape)
-│   └── sid_audio.c     # Efectos de sonido SID 6581
+│   ├── engine.c        # Motor CPU: minimax + alpha-beta
+│   ├── render.c        # Renderizado ANSI Unicode
+│   ├── input.c         # Captura de teclas (UART)
+│   └── sid_audio.s     # Efectos de sonido SID 6581
 ├── include/
 │   ├── romapi.h        # API de la ROM del monitor
 │   ├── chess.h         # Tipos y constantes del juego
@@ -108,13 +107,4 @@ ajedres/
 │   └── programa.cfg    # Configuracion del linker
 ├── makefile
 └── README.md
-```
-
-## ⚙️ Makefile
-
-```bash
-make          # Compilar chess.bin
-make clean    # Limpiar archivos generados
-make info     # Ver tamano del binario
-make map      # Ver mapa de memoria
 ```
