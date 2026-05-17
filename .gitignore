@@ -1,7 +1,7 @@
 # Archivos compilados y de build
 build/
+output/
 *.o
-*.cfg
 *.map
 *.lbl
 *.bin
